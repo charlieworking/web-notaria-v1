@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notaría Vilca - Titan Portal</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            void: '#050505',
+            surface: '#0f1218',
+            brand: {
+              blue: '#00f2ff',
+              purple: '#bd00ff',
+              gold: '#ffd700',
+              green: '#00ff9d'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+          },
+          animation: {
+            'marquee': 'marquee 60s linear infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'slide-up': 'slideUp 0.5s ease-out forwards',
+            'fade-in': 'fadeIn 0.5s ease-out forwards',
+          },
+          keyframes: {
+            marquee: { '0%': { transform: 'translateX(0%)' }, '100%': { transform: 'translateX(-100%)' } },
+            float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
+            slideUp: { '0%': { opacity: '0', transform: 'translateY(30px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+            fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@400;700;900&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    body { background-color: #050505; color: white; overflow-x: hidden; }
+    
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .glass-card-hover:hover {
+      border-color: rgba(0, 242, 255, 0.3);
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px -10px rgba(0, 242, 255, 0.1);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #050505; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00f2ff; }
+  </style>
+</head>
+<body>
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // --- COMPONENTES UI ---
+    const Icon = ({ name, size = 24, className = "" }) => {
+      const iconRef = useRef(null);
+      useEffect(() => {
+        if (window.lucide) {
+          window.lucide.createIcons({
+            root: iconRef.current,
+            nameAttr: 'data-name',
+            attrs: { class: className, width: size, height: size }
+          });
+        }
+      }, [name, size, className]);
+      return <i ref={iconRef} data-name={name}></i>;
+    };
+
+    const ProfessionalLogo = ({ onClick }) => (
+      <div className="flex items-center gap-3 cursor-pointer" onClick={onClick}>
+        <div className="relative w-10 h-10 flex items-center justify-center">
+          <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue to-brand-purple rounded-lg transform rotate-45 opacity-80"></div>
+          <div className="absolute inset-0.5 bg-void rounded-lg transform rotate-45 flex items-center justify-center">
+             <Icon name="scale" size={20} className="text-white" />
+          </div>
+        </div>
+        <div className="leading-tight">
+          <h1 className="text-xl font-display font-bold tracking-wider text-white">VILCA</h1>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-brand-blue font-bold">Notaría Digital</p>
+        </div>
+      </div>
+    );
+
+    const SectionTitle = ({ subtitle, title }) => (
+      <div className="text-center mb-16 animate-slide-up">
+        <span className="text-brand-blue font-bold tracking-[0.3em] uppercase text-xs mb-4 block">{subtitle}</span>
+        <h2 className="text-4xl md:text-6xl font-display font-bold text-white">{title}</h2>
+        <div className="w-24 h-1 bg-gradient-to-r from-brand-blue to-brand-purple mx-auto mt-6 rounded-full"></div>
+      </div>
+    );
+
+    const ImageCarousel = ({ images, height = "h-[600px]" }) => {
+      const [current, setCurrent] = useState(0);
+      useEffect(() => {
+        const timer = setInterval(() => setCurrent(p => (p + 1) % images.length), 5000);
+        return () => clearInterval(timer);
+      }, [images.length]);
+
+      return (
+        <div className={`relative w-full ${height} overflow-hidden rounded-3xl border border-white/10 group`}>
+          {images.map((img, idx) => (
+            <div key={idx} className={`absolute inset-0 transition-opacity duration-1000 ${idx === current ? 'opacity-100' : 'opacity-0'}`}>
+              <img src={img.url} className="w-full h-full object-cover opacity-60 transform transition-transform duration-[10000ms] group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-void via-void/40 to-transparent"></div>
+              <div className="absolute bottom-10 left-10 right-10 md:left-20 md:right-20">
+                <span className="bg-brand-blue/20 text-brand-blue border border-brand-blue/30 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest backdrop-blur-md">
+                  {img.tag}
+                </span>
+                <h3 className="text-3xl md:text-5xl font-bold mt-4 text-white drop-shadow-xl font-display">{img.title}</h3>
+                <p className="text-gray-300 mt-2 max-w-2xl text-lg hidden md:block">{img.desc}</p>
+              </div>
+            </div>
+          ))}
+          <div className="absolute bottom-6 right-6 flex gap-2">
+            {images.map((_, i) => (
+              <div key={i} className={`h-1 rounded-full transition-all duration-300 ${i === current ? 'w-12 bg-brand-blue' : 'w-4 bg-white/20'}`}></div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    // --- MODALES ---
+    const BookingModal = ({ isOpen, onClose, preselectedService }) => {
+      if (!isOpen) return null;
+      const [step, setStep] = useState(1);
+      const [selectedTime, setSelectedTime] = useState(null);
+      const timeSlots = ["09:00 AM", "10:30 AM", "12:00 PM", "03:00 PM", "04:30 PM"];
+
+      return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-void/90 backdrop-blur-md animate-fade-in">
+          <div className="bg-surface border border-white/10 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-slide-up relative">
+            <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors z-10"><Icon name="x" size={24}/></button>
+            <div className="bg-gradient-to-r from-brand-blue to-brand-purple p-6 text-center">
+              <h2 className="text-2xl font-display font-bold text-black uppercase tracking-wider">Reserva Online</h2>
+              <p className="text-black/80 text-sm font-bold">Confirma tu asistencia sin colas</p>
+            </div>
+            <div className="p-8">
+              {step === 1 ? (
+                <div className="space-y-6">
+                  <div>
+                    <label className="text-xs font-bold text-gray-400 uppercase mb-2 block">Trámite</label>
+                    <select className="w-full bg-void border border-white/20 rounded-xl p-4 text-white focus:border-brand-blue outline-none" defaultValue={preselectedService || ""}>
+                      <option value="" disabled>Seleccione un servicio...</option>
+                      <option value="empresas">Constitución de Empresas</option>
+                      <option value="vehicular">Transferencia Vehicular</option>
+                      <option value="inmuebles">Propiedad Inmueble</option>
+                      <option value="testamentos">Testamentos</option>
+                      <option value="poderes">Poderes</option>
+                      <option value="matrimonio">Matrimonio</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-400 uppercase mb-2 block">Fecha</label>
+                    <input type="date" className="w-full bg-void border border-white/20 rounded-xl p-4 text-white focus:border-brand-blue outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-400 uppercase mb-2 block">Horario</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {timeSlots.map(time => (
+                        <button key={time} onClick={() => setSelectedTime(time)} className={`py-2 px-1 rounded-lg text-xs font-bold border transition-colors ${selectedTime === time ? 'bg-brand-blue text-black border-brand-blue' : 'border-white/20 text-gray-300 hover:border-white'}`}>{time}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <button onClick={() => setStep(2)} disabled={!selectedTime} className="w-full bg-white text-black font-black py-4 rounded-xl hover:bg-brand-blue disabled:opacity-50 transition-colors uppercase tracking-widest mt-4">Confirmar</button>
+                </div>
+              ) : (
+                <div className="space-y-6 text-center animate-fade-in">
+                  <div className="w-20 h-20 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/50"><Icon name="check" size={40} /></div>
+                  <h3 className="text-2xl font-bold text-white">¡Cita Agendada!</h3>
+                  <p className="text-gray-400">Le esperamos a las <span className="text-white font-bold">{selectedTime}</span>. Revise su correo para la confirmación.</p>
+                  <button onClick={onClose} className="w-full border border-white/20 text-white font-bold py-4 rounded-xl hover:bg-white/10 transition-colors uppercase tracking-widest">Cerrar</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const ServiceModal = ({ service, onClose, onBooking }) => {
+      if (!service) return null;
+      const [tab, setTab] = useState('info');
+
+      return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-void/90 backdrop-blur-md animate-fade-in">
+          <div className="bg-surface border border-white/10 w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden relative flex flex-col md:flex-row h-[85vh] md:h-auto">
+            <button onClick={onClose} className="absolute top-4 right-4 text-white/50 hover:text-white z-20 bg-black/50 p-2 rounded-full"><Icon name="x"/></button>
+            <div className={`w-full md:w-1/3 p-8 flex flex-col justify-between relative overflow-hidden bg-white/5`}>
+              <div className="relative z-10">
+                <div className={`w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-6 text-white`}><Icon name={service.icon} size={32}/></div>
+                <h2 className="text-3xl font-display font-bold text-white mb-4">{service.title}</h2>
+                <p className="text-gray-300 text-sm leading-relaxed">{service.details}</p>
+                <div className="mt-6 p-4 bg-brand-blue/10 border border-brand-blue/20 rounded-xl">
+                  <p className="text-brand-blue text-xs font-bold uppercase mb-1">Costo Aproximado</p>
+                  <p className="text-white font-bold text-xl">{service.price || "S/ 150.00"}</p>
+                </div>
+              </div>
+              <div className="relative z-10 mt-8">
+                <button onClick={() => { onClose(); onBooking(service.id); }} className="w-full py-4 bg-white text-black font-bold rounded-xl hover:bg-brand-blue transition-colors flex items-center justify-center gap-2 mb-3 shadow-lg"><Icon name="calendar" size={18}/> Agendar Ahora</button>
+              </div>
+            </div>
+            <div className="w-full md:w-2/3 p-8 bg-surface overflow-y-auto">
+              <div className="flex gap-4 border-b border-white/10 mb-6">
+                {['info', 'reqs', 'steps'].map(t => (
+                  <button key={t} onClick={() => setTab(t)} className={`pb-3 text-sm font-bold uppercase tracking-wider ${tab === t ? 'text-brand-blue border-b-2 border-brand-blue' : 'text-gray-500 hover:text-white'}`}>
+                    {t === 'info' ? 'Descripción' : t === 'reqs' ? 'Requisitos' : 'Proceso'}
+                  </button>
+                ))}
+              </div>
+              <div className="animate-slide-up min-h-[300px]">
+                {tab === 'info' && (
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-bold text-white">Detalle del Servicio</h3>
+                    <p className="text-gray-400 leading-relaxed">{service.longDesc}</p>
+                    <div className="p-4 bg-white/5 rounded-xl mt-4"><h4 className="font-bold text-white mb-1 flex items-center gap-2"><Icon name="clock" size={16} className="text-brand-purple"/> Tiempo Estimado</h4><p className="text-sm text-gray-400">{service.time || "48 Horas hábiles"}</p></div>
+                  </div>
+                )}
+                {tab === 'reqs' && (
+                  <ul className="space-y-3">
+                    {service.reqs.map((req, i) => (
+                      <li key={i} className="flex items-start gap-3 p-3 bg-white/5 rounded-lg border border-white/5"><Icon name="check-circle-2" className="text-brand-green mt-0.5" size={18}/><span className="text-gray-300 text-sm">{req}</span></li>
+                    ))}
+                  </ul>
+                )}
+                {tab === 'steps' && (
+                  <div className="space-y-6">
+                    {service.steps.map((s, i) => (
+                      <div key={i} className="flex gap-4 relative">
+                        <div className="w-8 h-8 rounded-full bg-brand-blue/20 text-brand-blue border border-brand-blue flex items-center justify-center font-bold text-xs shrink-0 z-10">{i+1}</div>
+                        <div><h4 className="text-white font-bold text-sm">{s}</h4><p className="text-gray-500 text-xs">Paso verificado.</p></div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // --- APP PRINCIPAL ---
+    const NotariaApp = () => {
+      const [isScrolled, setIsScrolled] = useState(false);
+      const [selectedService, setSelectedService] = useState(null);
+      const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+      const [isBookingOpen, setIsBookingOpen] = useState(false);
+      const [isChatOpen, setIsChatOpen] = useState(false);
+
+      useEffect(() => {
+        const handleScroll = () => setIsScrolled(window.scrollY > 50);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+      }, []);
+
+      const scrollTo = (id) => {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        setIsMobileMenuOpen(false);
+      };
+
+      // DATOS MASIVOS
+      const services = [
+        { id: 1, title: "Constitución de Empresas", desc: "Formalización de SAC, EIRL y SRL.", details: "Gestión integral SUNARP y RUC.", longDesc: "Creamos su empresa con estatutos personalizados. Incluye biometría y envío telemático.", icon: "rocket", bg: "bg-brand-purple", price: "Desde S/ 450", time: "48 Horas", reqs: ["DNI Socios", "Reserva Nombre", "Objeto Social", "Capital"], steps: ["Minuta", "Escritura", "SUNARP", "RUC"] },
+        { id: 2, title: "Transferencia Vehicular", desc: "Compraventa segura con biometría.", details: "Conexión en tiempo real con SAT.", longDesc: "Evite estafas. Verificamos gravámenes y papeletas.", icon: "car", bg: "bg-brand-blue", price: "Desde S/ 180", time: "40 Minutos", reqs: ["Tarjeta Propiedad", "SOAT", "DNI", "Medio Pago"], steps: ["Verificación", "Biometría", "Acta", "Registro"] },
+        { id: 3, title: "Propiedad Inmueble", desc: "Compraventas e hipotecas seguras.", details: "Estudio de títulos exhaustivo.", longDesc: "Analizamos 10 años de antecedentes registrales.", icon: "home", bg: "bg-brand-green", price: "Según valor", time: "3-5 Días", reqs: ["Copia Literal", "HR y PU", "Alcabala", "DNI"], steps: ["Estudio", "Bloqueo", "Escritura", "Inscripción"] },
+        { id: 4, title: "Testamentos", desc: "Protección patrimonial familiar.", details: "Redacción confidencial.", longDesc: "Asegure el futuro de sus bienes con validez legal.", icon: "scroll", bg: "bg-brand-gold", price: "S/ 800", time: "Previa Cita", reqs: ["DNI Testador", "2 Testigos", "Cert. Médico", "Bienes"], steps: ["Entrevista", "Redacción", "Firma", "Archivo"] },
+        { id: 5, title: "Poderes", desc: "Representación legal nacional.", details: "Cartas poder y escrituras.", longDesc: "Delegue facultades para cobros o viajes.", icon: "file-signature", bg: "bg-orange-500", price: "S/ 150", time: "24 Horas", reqs: ["DNI Poderdante", "Datos Apoderado", "Vigencia", "Facultades"], steps: ["Identificación", "Redacción", "Firma", "Entrega"] },
+        { id: 6, title: "Matrimonio", desc: "Ceremonias civiles privadas.", details: "Cásese rápido y sin colas.", longDesc: "Ofrecemos ambiente exclusivo y flexibilidad.", icon: "heart-handshake", bg: "bg-pink-500", price: "S/ 350", time: "8 Días", reqs: ["Partidas Nac.", "Cert. Médicos", "DNI", "Edictos"], steps: ["Expediente", "Publicación", "Ceremonia", "Acta"] },
+        { id: 7, title: "Divorcio Notarial", desc: "Separación rápida y mutuo acuerdo.", details: "Disolución en 3 meses.", longDesc: "Trámite de Separación Convencional y Divorcio Ulterior.", icon: "users", bg: "bg-red-500", price: "S/ 1200", time: "3 Meses", reqs: ["Partida Matrimonio", "DNI", "Conciliación Hijos", "Separación Bienes"], steps: ["Solicitud", "Audiencia", "Escritura", "Registro"] },
+        { id: 8, title: "Sucesión Intestada", desc: "Declaratoria de herederos.", details: "Cuando no existe testamento.", longDesc: "Formalice la transmisión de bienes a herederos.", icon: "git-pull-request", bg: "bg-indigo-500", price: "S/ 600", time: "15 Días", reqs: ["Partida Defunción", "Partidas Nacimiento", "Cert. Negativo", "DNI"], steps: ["Anotación", "Publicación", "Acta", "Inscripción"] },
+        { id: 9, title: "Legalización Firmas", desc: "Certificación de documentos.", details: "Autenticación al instante.", longDesc: "El notario da fe de la autenticidad de la firma.", icon: "pen-tool", bg: "bg-teal-500", price: "S/ 25", time: "15 Minutos", reqs: ["DNI Original", "Documento", "Presencia Física"], steps: ["Identificación", "Firma", "Certificación"] },
+        { id: 10, title: "Prescripción Adquisitiva", desc: "Formalización de propiedad.", details: "Por posesión continua.", longDesc: "Saneamiento de inmuebles poseídos por más de 10 años.", icon: "map", bg: "bg-cyan-600", price: "Consultar", time: "3-6 Meses", reqs: ["Planos", "Memoria", "Testigos", "Pruebas"], steps: ["Anotación", "Inspección", "Carteles", "Escritura"] },
+        { id: 11, title: "Copias Certificadas", desc: "Fieles del original.", details: "Reproducción legal.", longDesc: "Copias con valor legal idéntico al original.", icon: "copy", bg: "bg-gray-500", price: "S/ 10 x hoja", time: "Inmediato", reqs: ["Original", "DNI Solicitante"], steps: ["Cotejo", "Sellado", "Firma"] },
+        { id: 12, title: "Actas Notariales", desc: "Constatación de hechos.", details: "Verificación fáctica.", longDesc: "El notario verifica hechos y levanta acta pública.", icon: "clipboard-list", bg: "bg-blue-600", price: "S/ 250", time: "Previa Cita", reqs: ["Solicitud", "DNI", "Lugar del Hecho"], steps: ["Solicitud", "Diligencia", "Redacción", "Cierre"] },
+      ];
+
+      const blogPosts = [
+        { title: "Nuevos requisitos para viajes de menores 2025", date: "Hace 2 días", cat: "Familia" },
+        { title: "Beneficios tributarios de las S.A.C.", date: "Hace 1 semana", cat: "Empresas" },
+        { title: "¿Cómo evitar estafas inmobiliarias?", date: "Hace 2 semanas", cat: "Seguridad" }
+      ];
+
+      const team = [
+        { name: "Dr. Carlos Vilca", role: "Notario Principal", img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80" },
+        { name: "Dra. Elena Rojas", role: "Jefa Corporativa", img: "https://plus.unsplash.com/premium_photo-1671305003520-e13998e32029?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+        { name: "Lic. Marco Polo", role: "Tecnología", img: "https://images.unsplash.com/photo-1686434538659-bb72333a1054?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" }
+      ];
+
+      return (
+        <div className="font-sans text-gray-200">
+          
+          {/* NAVBAR */}
+          <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-void/90 backdrop-blur-xl border-b border-white/5 py-3' : 'bg-transparent py-6'}`}>
+            <div className="container mx-auto px-6 flex justify-between items-center">
+              <ProfessionalLogo onClick={() => scrollTo('inicio')} />
+              <div className="hidden lg:flex items-center gap-8 bg-white/5 px-8 py-3 rounded-full border border-white/5 backdrop-blur-md">
+                {['Inicio', 'Servicios', 'Nosotros', 'Blog', 'Contacto'].map(item => (
+                  <button key={item} onClick={() => scrollTo(item.toLowerCase())} className="text-sm font-bold uppercase tracking-widest hover:text-brand-blue transition-colors">{item}</button>
+                ))}
+              </div>
+              <button onClick={() => setIsBookingOpen(true)} className="hidden md:flex bg-white text-black px-6 py-2.5 rounded-lg font-bold uppercase text-xs tracking-widest hover:bg-brand-blue transition-colors">Agendar</button>
+              <button className="lg:hidden text-white" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}><Icon name="menu" size={28}/></button>
+            </div>
+            {isMobileMenuOpen && (
+              <div className="absolute top-full left-0 w-full bg-void border-t border-white/10 p-6 flex flex-col gap-4 lg:hidden">
+                {['Inicio', 'Servicios', 'Nosotros', 'Contacto'].map(item => (
+                  <button key={item} onClick={() => scrollTo(item.toLowerCase())} className="text-left font-bold py-2 border-b border-white/10">{item}</button>
+                ))}
+              </div>
+            )}
+          </nav>
+
+          {/* 1. HERO */}
+          <header id="inicio" className="relative h-screen w-full flex items-center justify-center overflow-hidden">
+            <div className="absolute inset-0">
+               <ImageCarousel images={[
+                  { url: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80", title: "Innovación Notarial", tag: "Futuro", desc: "El primer centro notarial 100% digitalizado de Lima." },
+                  { url: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80", title: "Seguridad Jurídica", tag: "Confianza", desc: "Protegemos sus intereses con tecnología biométrica avanzada." },
+                  { url: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80", title: "Asesoría Experta", tag: "Líderes", desc: "Un equipo legal multidisciplinario a su servicio." }
+               ]} height="h-full" />
+            </div>
+            <div className="absolute inset-0 bg-void/70 z-10 flex items-center justify-center">
+              <div className="text-center px-6 max-w-4xl animate-slide-up">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-blue/30 bg-brand-blue/10 backdrop-blur-md mb-6">
+                  <span className="w-2 h-2 rounded-full bg-brand-blue animate-pulse"></span>
+                  <span className="text-brand-blue text-xs font-bold uppercase tracking-widest">En Línea Ahora</span>
+                </div>
+                <h1 className="text-5xl md:text-8xl font-display font-bold leading-none mb-8 text-white">
+                  UNA NOTARÍA QUE <br/> <span className="neon-text">EVOLUCIONA CONTIGO.</span>
+                </h1>
+                <p className="text-xl text-gray-300 mb-10 font-light">Olvídate del papel. Bienvenido a una notaría más ágil, moderna y pensada para simplificar cada uno de tus trámites.</p>
+                <div className="flex justify-center gap-4">
+                  <button onClick={() => scrollTo('servicios')} className="px-8 py-4 bg-brand-blue text-black font-bold uppercase tracking-widest rounded hover:bg-white transition-colors shadow-[0_0_20px_rgba(0,242,255,0.4)]">Ver Servicios</button>
+                  <button onClick={() => scrollTo('contacto')} className="px-8 py-4 border border-white/20 text-white font-bold uppercase tracking-widest rounded hover:bg-white/10 transition-colors">Contacto</button>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* 2. MARQUEE & STATS */}
+          <div className="bg-white/5 border-y border-white/10 py-6 overflow-hidden">
+            <div className="whitespace-nowrap animate-marquee flex gap-16 text-white/50 font-display font-bold text-4xl uppercase">
+              <span>Constitución Express</span> <span>•</span> <span>Biometría Digital</span> <span>•</span> <span>Seguridad Jurídica</span> <span>•</span> <span>Atención VIP</span> <span>•</span>
+              <span>Constitución Express</span> <span>•</span> <span>Biometría Digital</span> <span>•</span> <span>Seguridad Jurídica</span> <span>•</span> <span>Atención VIP</span> <span>•</span>
+            </div>
+          </div>
+
+          <section className="py-20 container mx-auto px-6">
+            <div className="grid md:grid-cols-4 gap-8 text-center">
+              {[{n:"25+",l:"Años de Experiencia"},{n:"15k",l:"Clientes Felices"},{n:"48h",l:"Constitución Express"},{n:"100%",l:"Seguridad Digital"}].map((s,i)=>(
+                <div key={i} className="glass-panel p-6 rounded-2xl"><div className="text-4xl font-bold text-white mb-2">{s.n}</div><div className="text-xs text-brand-blue font-bold uppercase tracking-widest">{s.l}</div></div>
+              ))}
+            </div>
+          </section>
+
+          {/* 3. CATÁLOGO SERVICIOS (12 ITEMS) */}
+          <section id="servicios" className="py-32 container mx-auto px-6 bg-surface/50 rounded-[3rem] my-20">
+            <SectionTitle subtitle="Soluciones Integrales" title="Catálogo de Servicios" />
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {services.map((srv, i) => (
+                <div key={i} className="glass-card p-8 rounded-3xl group cursor-pointer flex flex-col justify-between h-[380px] relative overflow-hidden">
+                  <div className={`absolute top-0 right-0 w-32 h-32 opacity-10 rounded-bl-full transition-transform group-hover:scale-150 ${srv.bg}`}></div>
+                  <div>
+                    <div className="flex justify-between items-start mb-6">
+                      <div className={`p-4 rounded-xl bg-white/5 ${srv.color} group-hover:bg-white group-hover:text-black transition-colors`}><Icon name={srv.icon} size={32}/></div>
+                      <Icon name="arrow-up-right" className="text-gray-600 group-hover:text-white"/>
+                    </div>
+                    <h4 className="text-xl font-bold text-white mb-3 group-hover:text-brand-blue transition-colors">{srv.title}</h4>
+                    <p className="text-gray-400 text-sm leading-relaxed line-clamp-3">{srv.desc}</p>
+                  </div>
+                  <button onClick={() => setSelectedService(srv)} className="mt-auto w-full py-3 border border-white/10 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all group-hover:border-transparent flex items-center justify-center gap-2">
+                    Ver Detalles <Icon name="plus" size={14}/>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* 4. NOSOTROS & GALERÍA */}
+          <section id="nosotros" className="py-32 container mx-auto px-6">
+            <SectionTitle subtitle="Nuestra Firma" title="Experiencia y Liderazgo" />
+            <div className="mb-24">
+              <ImageCarousel images={[
+                { url: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&q=80", title: "Salas de Firmas Privadas", tag: "Privacidad", desc: "Espacios diseñados para su confort." },
+                { url: "https://images.unsplash.com/photo-1604328698692-f76ea9498e76?auto=format&fit=crop&q=80", title: "Centro de Datos", tag: "Tecnología", desc: "Servidores seguros para resguardo de información." },
+                { url: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&q=80", title: "Auditorio Principal", tag: "Eventos", desc: "Capacidad para asambleas corporativas." }
+              ]} />
+            </div>
+            <div className="grid md:grid-cols-3 gap-8">
+              {team.map((member, i) => (
+                <div key={i} className="group relative overflow-hidden rounded-2xl h-[400px]">
+                  <img src={member.img} alt={member.name} className="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-700"/>
+                  <div className="absolute bottom-0 left-0 p-6 w-full bg-gradient-to-t from-black via-black/80 to-transparent">
+                    <h3 className="text-xl font-bold text-white">{member.name}</h3>
+                    <p className="text-brand-blue text-xs font-bold uppercase tracking-widest mt-1">{member.role}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* 5. BLOG */}
+          <section id="blog" className="py-24 bg-white/5 border-y border-white/5">
+            <div className="container mx-auto px-6">
+              <SectionTitle subtitle="Actualidad" title="Noticias Legales" />
+              <div className="grid md:grid-cols-3 gap-8">
+                {blogPosts.map((post, i) => (
+                  <div key={i} className="glass-panel p-8 rounded-2xl hover:bg-white/10 transition-colors cursor-pointer group">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="bg-brand-purple/20 text-brand-purple px-3 py-1 rounded-full text-xs font-bold uppercase">{post.cat}</span>
+                      <span className="text-xs text-gray-500">{post.date}</span>
+                    </div>
+                    <h4 className="text-xl font-bold text-white group-hover:text-brand-blue transition-colors mb-2">{post.title}</h4>
+                    <p className="text-gray-400 text-sm">Lea más sobre las nuevas regulaciones...</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* 6. CONTACTO & MAPA */}
+          <section id="contacto" className="py-32 bg-surface relative">
+            <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-16">
+              <div>
+                <SectionTitle subtitle="Contacto" title="Estamos Cerca" />
+                <div className="space-y-6 mb-12">
+                  <div className="flex items-center gap-6 p-6 glass-panel rounded-2xl border border-white/5">
+                    <div className="w-12 h-12 bg-brand-blue/10 rounded-full flex items-center justify-center text-brand-blue"><Icon name="map-pin"/></div>
+                    <div><h4 className="font-bold text-white">Av. Aviación 2468</h4><p className="text-gray-400">San Borja, Lima</p></div>
+                  </div>
+                  <div className="flex items-center gap-6 p-6 glass-panel rounded-2xl border border-white/5">
+                    <div className="w-12 h-12 bg-brand-purple/10 rounded-full flex items-center justify-center text-brand-purple"><Icon name="phone"/></div>
+                    <div><h4 className="font-bold text-white">(01) 475-0045</h4><p className="text-gray-400">Central Telefónica</p></div>
+                  </div>
+                  <div className="flex items-center gap-6 p-6 glass-panel rounded-2xl border border-white/5">
+                    <div className="w-12 h-12 bg-brand-gold/10 rounded-full flex items-center justify-center text-brand-gold"><Icon name="mail"/></div>
+                    <div><h4 className="font-bold text-white">informes@notariavilca.org</h4><p className="text-gray-400">Consultas generales</p></div>
+                  </div>
+                </div>
+                <div className="w-full h-64 rounded-3xl overflow-hidden glass-panel border border-white/10">
+                  <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3901.665790365737!2d-77.0035416242691!3d-12.091176242273615!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105c7d0d0eb3fcd%3A0x6a192e272332a677!2sAv.%20Aviaci%C3%B3n%202468%2C%20San%20Borja%2015036!5e0!3m2!1ses!2spe!4v1709581234567!5m2!1ses!2spe" width="100%" height="100%" style={{border:0}} allowFullScreen="" loading="lazy" className="opacity-70 hover:opacity-100 transition-opacity duration-500 grayscale hover:grayscale-0"></iframe>
+                </div>
+              </div>
+              <form className="glass p-10 rounded-[2rem] space-y-6 h-fit sticky top-32">
+                <h3 className="text-2xl font-bold mb-6 text-white">Mensaje Directo</h3>
+                <div className="grid grid-cols-2 gap-6">
+                  <input placeholder="Nombre" className="bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:border-brand-blue outline-none transition-colors"/>
+                  <input placeholder="Teléfono" className="bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:border-brand-blue outline-none transition-colors"/>
+                </div>
+                <input placeholder="Correo Corporativo" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:border-brand-blue outline-none transition-colors"/>
+                <textarea rows="4" placeholder="Mensaje" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:border-brand-blue outline-none transition-colors"></textarea>
+                <button className="w-full py-5 bg-white text-black font-black uppercase tracking-widest rounded-xl hover:bg-brand-blue transition-colors shadow-xl">Enviar Mensaje</button>
+              </form>
+            </div>
+          </section>
+
+          {/* FOOTER */}
+          <footer className="bg-void border-t border-white/10 pt-20 pb-10">
+            <div className="container mx-auto px-6">
+              <div className="grid md:grid-cols-4 gap-12 mb-16">
+                <div className="space-y-6"><ProfessionalLogo onClick={() => scrollTo('inicio')} /><p className="text-gray-400 text-sm leading-relaxed">Líderes en innovación digital notarial.</p></div>
+                <div><h4 className="text-white font-bold uppercase tracking-widest mb-6">Enlaces</h4><ul className="space-y-2 text-sm text-gray-400"><li className="hover:text-brand-blue cursor-pointer" onClick={() => scrollTo('inicio')}>Inicio</li><li className="hover:text-brand-blue cursor-pointer" onClick={() => scrollTo('servicios')}>Servicios</li><li className="hover:text-brand-blue cursor-pointer" onClick={() => scrollTo('nosotros')}>Nosotros</li></ul></div>
+                <div><h4 className="text-white font-bold uppercase tracking-widest mb-6">Legal</h4><ul className="space-y-2 text-sm text-gray-400"><li>Privacidad</li><li>Términos</li><li>Reclamaciones</li></ul></div>
+                <div><h4 className="text-white font-bold uppercase tracking-widest mb-6">Horario</h4><p className="text-sm text-gray-400">Lun - Vie: 8:30am - 6:30pm</p><p className="text-sm text-gray-400">Sáb: 9:00am - 1:00pm</p></div>
+              </div>
+              <div className="border-t border-white/10 pt-8 text-center text-xs text-gray-500"><p>&copy; 2025 Notaría Vilca S.A.C.</p></div>
+            </div>
+          </footer>
+
+          {/* MODALES FLOTANTES */}
+          <BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} preselectedService={selectedService ? selectedService.id : null} />
+          <ServiceModal service={selectedService} onClose={() => setSelectedService(null)} onBooking={(id) => { setSelectedService(null); setIsBookingOpen(true); }} />
+          
+          <div className="fixed bottom-8 right-8 z-50"><button onClick={() => setIsChatOpen(!isChatOpen)} className="bg-brand-blue text-black p-4 rounded-full shadow-lg hover:scale-110 transition-transform"><Icon name={isChatOpen ? "x" : "message-circle"} size={28}/></button></div>
+          {isChatOpen && <div className="fixed bottom-24 right-8 w-80 md:w-96 bg-surface/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-4"><div className="text-center font-bold text-white mb-2">Asistente Virtual</div><div className="h-40 bg-white/5 rounded p-2 text-sm text-gray-300">Hola, ¿en qué puedo ayudarte?</div></div>}
+
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<NotariaApp />);
+  </script>
+</body>
+</html>
